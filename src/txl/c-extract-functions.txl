@@ -8,7 +8,7 @@
 % Revised 30.04.08 - unmark embedded functions - JRC
 
 % Using Gnu C grammar
-include "c.grm.1"
+include "c.grm"
 
 % Ignore BOM headers from Windows
 include "bom.grm"

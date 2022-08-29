@@ -1,0 +1,43 @@
+% Null transform - format output according to grammar
+%include "test/C18/c.grm"
+include "c.grm"
+
+% Ignore byte order marks on source files
+%include "test/C18/bom.grm"
+include "bom.grm"
+
+% Uncomment this line to approximately parse and preserve comments
+% include "C18/c-comments.grm"
+% TODO: uncommenting is leading to issues with multiline '//' comments, so disabled
+
+rule replaceXDP_MD
+	replace [token]
+	 xdp_md
+	by
+	 __sk_buff
+end rule
+
+rule replaceXDP_DROP
+	replace [token]
+	  XDP_DROP
+	by
+	  TC_ACT_SHOT
+end rule
+
+
+rule replaceXDP_PASS
+	replace [token]
+	  XDP_PASS
+	by
+	  TC_ACT_OK
+end rule
+
+function main 
+	replace [program]
+	 P [program]
+	by
+	 P [replaceXDP_MD]
+	 [replaceXDP_DROP]
+	 [replaceXDP_PASS]
+end function
+

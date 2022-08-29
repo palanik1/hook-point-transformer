@@ -16,9 +16,7 @@
  */
 
 #define KBUILD_MODNAME "foo"
-#include <bpf/bpf_helpers.h>
-#include "hash_func01.h"
-
+#include <stddef.h>
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -28,7 +26,11 @@
 #include <linux/ipv6.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
-#include <stddef.h>
+#include <linux/pkt_cls.h>
+#include "bpf_helpers.h"
+#include "hash_func01.h"
+
+
 
 #define LINUX_VERSION_CODE 263682
 
@@ -227,7 +229,7 @@ static __always_inline int get_dport(void* trans_data, void* data_end, __u8 prot
 	}
 }
 
-static int __always_inline filter_ipv4(struct xdp_md* ctx, void* data, __u64 nh_off, void* data_end, __u16 vlan0, __u16 vlan1)
+static int __always_inline filter_ipv4(struct __sk_buff* ctx, void* data, __u64 nh_off, void* data_end, __u16 vlan0, __u16 vlan1)
 {
 	struct iphdr* iph = data + nh_off;
 	int dport;
@@ -306,6 +308,7 @@ static int __always_inline filter_ipv4(struct xdp_md* ctx, void* data, __u64 nh_
 		if (!iface_peer) {
 			return TC_ACT_SHOT;
 		} else {
+		  //IRL: Should we remove this since we have already gone through network stack processing
 			return bpf_redirect_map(&tx_peer, tx_port, 0);
 		}
 #else
@@ -373,7 +376,7 @@ static int __always_inline filter_ipv4(struct xdp_md* ctx, void* data, __u64 nh_
 #endif
 }
 
-static int __always_inline filter_ipv6(struct xdp_md* ctx, void* data, __u64 nh_off, void* data_end, __u16 vlan0, __u16 vlan1)
+static int __always_inline filter_ipv6(struct __sk_buff* ctx, void* data, __u64 nh_off, void* data_end, __u16 vlan0, __u16 vlan1)
 {
 	struct ipv6hdr* ip6h = data + nh_off;
 	int dport;
@@ -479,7 +482,7 @@ static int __always_inline filter_ipv6(struct xdp_md* ctx, void* data, __u64 nh_
 #endif
 }
 SEC("xdp")
-int xdp_hashfilter(struct xdp_md* ctx)
+int xdp_hashfilter(struct __sk_buff* ctx)
 {
 	void* data_end = (void*) (long) ctx->data_end;
 	void* data = (void*) (long) ctx->data;

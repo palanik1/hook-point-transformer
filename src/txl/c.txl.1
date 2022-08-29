@@ -1,8 +1,8 @@
 % Null transform - format output according to grammar
-include "test/C18/c.grm"
+include "c.grm.1"
 
 % Ignore byte order marks on source files
-include "test/C18/bom.grm"
+include "bom.grm"
 
 % Uncomment this line to approximately parse and preserve comments
 % include "C18/c-comments.grm"
@@ -44,24 +44,23 @@ rule replaceETH_PROTOINFO
 end rule
 
 %rule addpkt_cls_header
-%	replace '#include <stdio.h>
+%	replace [token]
+%		#include <linux/bpf.h>
 %	by
-%		'#include <linux/bpf.h> 
-%[NL] #include <linux/pkt_cls.h> [NL]
+%		#include <linux/bpf.h> [NL] #include <linux/pkt_cls.h>
 %end rule
 
-rule traceStatement
- replace [preprocessor_line]
-   '#include <stdio.h>
- by
-   "#include <stdio.h>" [NL] "#include <conio.h>" 
+rule r1
+	replace [function_header] 
+		T [decl_qualifier_or_type_specifier] M [macro_specifier] D [declarator] F [function_declarator_extension]
+	by
+		M T D F
 end rule
 
 function main 
 	replace [program]
 	 P [program]
 	by
-	 P [replaceXDP_MD]
-	  [traceStatement]
+	 P [r1]
 end function
 

@@ -4,11 +4,14 @@
 #3)for each file, run coccinelle and txl and redirect output to same file (this will handle cases where no xdp->tc is needed for some functions)
 #4)compile and check can be loaded
 
+#source "./verifier.sh"
+
 function run_pipeline {
     for f in ${allFiles[@]}; do
 	echo "FILE: " ${f}
+	cp ${f} ${f}.orig
+	run_txl ${f}
 	run_coccinelle ${f}
-	#run_txl ${f}
     done
 
     }
@@ -26,14 +29,11 @@ function run_txl {
     mv op.c ${file}
 }
 
-function attach_and_check {
-    echo "TODO"
-
-}
-
 #TODO: make cmd line args
-allFiles=("xdp_prog_kern.c" "af_xdp_kern.c")
-COCCI_FILE="xdp-drop.cocci"
-TXL_FILE="c.txl.1"
+#allFiles=("xdp_prog_kern.c" "af_xdp_kern.c" "xdp_prog_kern_02.c" "rewrite_helpers.h")
+allFiles=("xdp_filter.c")
+COCCI_FILE="./coccinelle/xdp-to-tc.cocci"
+TXL_FILE="./txl/c.txl.1"
 
 run_pipeline
+

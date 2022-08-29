@@ -2,9 +2,27 @@
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 #include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
+#include <linux/pkt_cls.h>
 
-#include "common_kern_user.h" /* defines: struct datarec; */
+//#include "common_kern_user.h" /* defines: struct datarec; */
 
+/* This is the data record stored in the map */
+struct datarec {
+	__u64 rx_packets;
+        __u64 rx_bytes;
+	/* Assignment#1: Add byte counters */
+};
+
+#ifndef XDP_ACTION_MAX
+#define XDP_ACTION_MAX (XDP_REDIRECT + 1)
+#endif
 /* Lesson: See how a map is defined.
  * - Here an array with XDP_ACTION_MAX (max_)entries are created.
  * - The idea is to keep stats per (enum) xdp_action
@@ -24,7 +42,7 @@ struct bpf_map_def SEC("maps") xdp_stats_map = {
 #endif
 
 static __always_inline
-__u32 xdp_stats_record_action(struct xdp_md *ctx, __u32 action)
+__u32 xdp_stats_record_action(struct __sk_buff *ctx, __u32 action)
 {
 	void *data_end = (void *)(long)ctx->data_end;
 	void *data     = (void *)(long)ctx->data;
@@ -51,27 +69,30 @@ __u32 xdp_stats_record_action(struct xdp_md *ctx, __u32 action)
 }
 
 SEC("xdp_pass")
-int  xdp_pass_func(struct xdp_md *ctx)
+int  xdp_pass_func(struct __sk_buff *ctx)
 {
 	__u32 action = TC_ACT_OK; /* XDP_PASS = 2 */
 
-	return xdp_stats_record_action(ctx, action);
+	//return xdp_stats_record_action(ctx, action);
+	return action;
 }
 
 SEC("xdp_drop")
-int  xdp_drop_func(struct xdp_md *ctx)
+int  xdp_drop_func(struct __sk_buff *ctx)
 {
 	__u32 action = TC_ACT_SHOT;
 
-	return xdp_stats_record_action(ctx, action);
+	//return xdp_stats_record_action(ctx, action);
+	return action;
 }
 
 SEC("xdp_abort")
-int  xdp_abort_func(struct xdp_md *ctx)
+int  xdp_abort_func(struct __sk_buff *ctx)
 {
 	__u32 action = XDP_ABORTED;
 
-	return xdp_stats_record_action(ctx, action);
+	//return xdp_stats_record_action(ctx, action);
+	return action;
 }
 
 char _license[] SEC("license") = "GPL";

@@ -17,7 +17,7 @@ struct ethhdr *e;
 t fn(struct xdp_md *ctx){
 ...
 - e->h_proto
-+ ctx->protocol1
++ ctx->protocol
 ...
 }
 
