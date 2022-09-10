@@ -13,7 +13,7 @@ identifier p,c,fn;
 type t;
 struct ethhdr *e;
 @@
-t fn(struct xdp_md *ctx){
+t fn(struct __sk_buff *ctx){
 ...
 - e->h_proto
 + ctx->protocol

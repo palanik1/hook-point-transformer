@@ -6,6 +6,10 @@
 function run_pipeline {
     for f in ${allFiles[@]}; do
 	echo "FILE: " ${f}
+	if [[ ${f} =~ *"bpf"* ]]; then
+	    echo "Skip bpf file."
+	    continue
+	fi
 	cp ${f} ${f}.orig
 	run_txl ${f}
 	run_coccinelle ${f}
@@ -28,7 +32,9 @@ function run_txl {
 
 #TODO: make cmd line args
 #allFiles=("xdp_prog_kern.c" "af_xdp_kern.c" "xdp_prog_kern_02.c" "rewrite_helpers.h")
-allFiles=("xdp_filter.c")
+#allFiles=("xdp_filter.c")
+#allFiles=("./katran-test/extraction/extracted.c")
+allFiles=(./katran-test/extraction/*)
 COCCI_FILE="./coccinelle/xdp-to-tc.cocci"
 TXL_FILE="./txl/c.txl.1"
 
