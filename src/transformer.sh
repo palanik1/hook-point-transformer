@@ -34,7 +34,7 @@ function run_txl {
 #allFiles=("xdp_prog_kern.c" "af_xdp_kern.c" "xdp_prog_kern_02.c" "rewrite_helpers.h")
 #allFiles=("xdp_filter.c")
 #allFiles=("./katran-test/extraction/extracted.c")
-allFiles=(./katran-test/extraction/*)
+allFiles=(./decap-test/extraction/*)
 COCCI_FILE="./coccinelle/xdp-to-tc.cocci"
 TXL_FILE="./txl/c.txl.1"
 
