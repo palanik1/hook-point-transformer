@@ -52,6 +52,13 @@ t fn(struct xdp_md *ctx){
 #include <...>
 +#include <linux/pkt_cls.h>
 
+
+@replacexdpadjust@
+expression E1,E2;
+@@
+- bpf_xdp_adjust_head(E1,E2)
++ bpf_skb_adjust_room(E1,E2,BPF_ADJ_ROOM_MAC,BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)
+
 @removequeue@
 identifier p,c,fn,ctx;
 type t;
