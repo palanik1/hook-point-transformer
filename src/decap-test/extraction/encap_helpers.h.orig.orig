@@ -5,7 +5,6 @@
 #include <linux/udp.h>
 #include <string.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "bpf.h"
 #include "bpf_endian.h"

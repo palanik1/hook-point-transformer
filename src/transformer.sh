@@ -4,9 +4,10 @@
 
 
 function run_pipeline {
+    bpf="bpf"
     for f in ${allFiles[@]}; do
 	echo "FILE: " ${f}
-	if [[ ${f} =~ *"bpf"* ]]; then
+	if [[ "${f}" == *"${bpf}"* ]]; then
 	    echo "Skip bpf file."
 	    continue
 	fi

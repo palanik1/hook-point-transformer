@@ -7,7 +7,6 @@
 #include <linux/ipv6.h>
 #include <stddef.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "balancer_helpers.h"
 #include "balancer_structs.h"
@@ -80,7 +79,7 @@ __attribute__ ((__always_inline__)) static inline int send_icmp6_reply (void *da
 
 __attribute__ ((__always_inline__)) static inline int send_icmp4_too_big (struct __sk_buff *xdp) {
     int headroom = (int) sizeof (struct iphdr) + (int) sizeof (struct icmphdr);
-    if (bpf_skb_adjust_room (xdp, 0 - headroom, BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - headroom, BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return TC_ACT_SHOT;
     }
     void *data = (void *) (long) xdp->data;
@@ -124,7 +123,7 @@ __attribute__ ((__always_inline__)) static inline int send_icmp4_too_big (struct
 
 __attribute__ ((__always_inline__)) static inline int send_icmp6_too_big (struct __sk_buff *xdp) {
     int headroom = (int) sizeof (struct ipv6hdr) + (int) sizeof (struct icmp6hdr);
-    if (bpf_skb_adjust_room (xdp, 0 - headroom, BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - headroom, BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return TC_ACT_SHOT;
     }
     void *data = (void *) (long) xdp->data;

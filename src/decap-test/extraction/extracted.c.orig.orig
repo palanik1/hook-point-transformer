@@ -89,7 +89,6 @@
 #include <linux/ptrace.h>
 #include <linux/version.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 
 __attribute__ ((__always_inline__)) static inline int process_l3_headers (struct packet_description *pckt, __u8 *protocol, __u64 off, __u16 *pkt_bytes, void *data, void *data_end, bool is_ipv6) {
     __u64 iph_len;

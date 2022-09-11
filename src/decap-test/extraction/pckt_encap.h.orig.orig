@@ -4,7 +4,6 @@
 #include <linux/ipv6.h>
 #include <string.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "balancer_helpers.h"
 #include "balancer_structs.h"
@@ -26,7 +25,7 @@ __attribute__ ((__always_inline__)) static inline bool encap_v6 (struct __sk_buf
     __u32 ip_suffix;
     __u32 saddr [4];
     __u8 proto;
-    if (bpf_skb_adjust_room (xdp, 0 - (int) sizeof (struct ipv6hdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - (int)sizeof(struct ipv6hdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     data = (void *) (long) xdp->data;
@@ -67,7 +66,7 @@ __attribute__ ((__always_inline__)) static inline bool encap_v4 (struct __sk_buf
     __u32 ip_suffix = bpf_htons (pckt->flow.port16[0]);
     ip_suffix <<= 16;
     ip_suffix ^= pckt->flow.src;
-    if (bpf_skb_adjust_room (xdp, 0 - (int) sizeof (struct iphdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - (int)sizeof(struct iphdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     data = (void *) (long) xdp->data;
@@ -98,7 +97,7 @@ __attribute__ ((__always_inline__)) static inline bool decap_v6 (struct __sk_buf
     else {
         new_eth->h_proto = BE_ETH_P_IPV6;
     }
-    if (bpf_skb_adjust_room (xdp, (int) sizeof (struct ipv6hdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, (int)sizeof(struct ipv6hdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     *data = (void *) (long) xdp->data;
@@ -114,7 +113,7 @@ __attribute__ ((__always_inline__)) static inline bool decap_v4 (struct __sk_buf
     memcpy (new_eth -> h_source, old_eth -> h_source, 6);
     memcpy (new_eth -> h_dest, old_eth -> h_dest, 6);
     new_eth->h_proto = BE_ETH_P_IP;
-    if (bpf_skb_adjust_room (xdp, (int) sizeof (struct iphdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, (int)sizeof(struct iphdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     *data = (void *) (long) xdp->data;
@@ -201,7 +200,7 @@ __attribute__ ((__always_inline__)) static inline bool gue_encap_v4 (struct __sk
     }
     ipv4_src = src->dst;
     sport ^= ((pckt->flow.src >> 16) & 0xFFFF);
-    if (bpf_skb_adjust_room (xdp, 0 - ((int) sizeof (struct iphdr) + (int) sizeof (struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - ((int)sizeof(struct iphdr) + (int)sizeof(struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     data = (void *) (long) xdp->data;
@@ -240,7 +239,7 @@ __attribute__ ((__always_inline__)) static inline bool gue_encap_v6 (struct __sk
     if (!src) {
         return false;
     }
-    if (bpf_skb_adjust_room (xdp, 0 - ((int) sizeof (struct ipv6hdr) + (int) sizeof (struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, 0 - ((int)sizeof(struct ipv6hdr) + (int)sizeof(struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     data = (void *) (long) xdp->data;
@@ -283,7 +282,7 @@ __attribute__ ((__always_inline__)) static inline bool gue_decap_v4 (struct __sk
     memcpy (new_eth -> h_source, old_eth -> h_source, 6);
     memcpy (new_eth -> h_dest, old_eth -> h_dest, 6);
     new_eth->h_proto = BE_ETH_P_IP;
-    if (bpf_skb_adjust_room (xdp, (int) (sizeof (struct iphdr) + sizeof (struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, (int)(sizeof(struct iphdr) + sizeof(struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     *data = (void *) (long) xdp->data;
@@ -305,7 +304,7 @@ __attribute__ ((__always_inline__)) static inline bool gue_decap_v6 (struct __sk
     else {
         new_eth->h_proto = BE_ETH_P_IPV6;
     }
-    if (bpf_skb_adjust_room (xdp, (int) (sizeof (struct ipv6hdr) + sizeof (struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_skb_adjust_room(xdp, (int)(sizeof(struct ipv6hdr) + sizeof(struct udphdr)), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
         return false;
     }
     *data = (void *) (long) xdp->data;

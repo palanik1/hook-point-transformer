@@ -4,8 +4,6 @@
 #include <linux/ipv6.h>
 #include <string.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "balancer_helpers.h"
 #include "balancer_structs.h"
@@ -30,7 +28,7 @@ __attribute__ ((__always_inline__)) static inline bool decap_v6 (struct __sk_buf
     else {
         new_eth->h_proto = BE_ETH_P_IPV6;
     }
-    if (bpf_skb_adjust_room(xdp, (int)sizeof(struct ipv6hdr), BPF_ADJ_ROOM_MAC, BPF_F_ADJ_ROOM_ENCAP_L3_IPV4)) {
+    if (bpf_xdp_adjust_head (xdp, (int) sizeof (struct ipv6hdr))) {
         return false;
     }
     *data = (void *) (long) xdp->data;

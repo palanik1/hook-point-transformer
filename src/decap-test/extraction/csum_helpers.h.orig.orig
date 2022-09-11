@@ -6,7 +6,6 @@
 #include <linux/udp.h>
 #include <stdbool.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "bpf.h"
 #include "bpf_endian.h"
 #include "bpf_helpers.h"

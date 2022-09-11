@@ -5,7 +5,6 @@
 #include <linux/ipv6.h>
 #include <stdbool.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "balancer_structs.h"
 #include "bpf.h"
