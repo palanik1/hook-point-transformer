@@ -7,7 +7,6 @@
 #include <linux/tcp.h>
 #include <linux/udp.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "flow_debug_maps.h"
 
 __attribute__ ((__always_inline__)) static inline __u32 get_next_ports (void *transport_hdr, __u8 proto, void *data_end) {

@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <linux/pkt_cls.h>
-#include <linux/pkt_cls.h>
 #include "balancer_consts.h"
 #include "balancer_helpers.h"
 #include "bpf.h"

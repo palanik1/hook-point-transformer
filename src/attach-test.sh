@@ -161,13 +161,13 @@ function attach_and_check {
 }
 
 #<script> <prog> <sec>
-PROG_TC="./katran-test/extraction/extracted.o"
+PROG_TC="./decap-test/extraction/extracted.o"
 PROG_XDP="xdp_filter.o"
-SEC="xdp"
+SEC="decap"
 
 echo "Attaching at TC"
 attach_only TC ${PROG_TC} ${SEC}
-clean_TC veth2
+#clean_TC veth2
 #read
 #echo "Attaching at XDP"
 #attach_and_check XDP ${PROG_XDP} ${SEC}

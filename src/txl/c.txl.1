@@ -35,6 +35,14 @@ rule replaceXDP_PASS
 	  TC_ACT_OK
 end rule
 
+rule replaceXDP_ABORTED
+	replace [token]
+	  XDP_ABORTED
+	by
+	  TC_ACT_SHOT
+end rule
+
+
 rule replaceETH_PROTOINFO
 	replace [TYPE1] 
 	  T [type_specifier] x [charlit] = P [number]
@@ -63,6 +71,7 @@ function main
 	by
 	 P [replaceXDP_MD]
 	   [replaceXDP_PASS]
-	   [replaceXDP_DROP]		
+	   [replaceXDP_DROP]
+	   [replaceXDP_ABORTED]		
 end function
 

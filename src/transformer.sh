@@ -4,12 +4,19 @@
 
 
 function run_pipeline {
+    bpf="bpf"
     for f in ${allFiles[@]}; do
 	echo "FILE: " ${f}
-	if [[ ${f} =~ *"bpf"* ]]; then
+	if [[ "${f}" == *"${bpf}"* ]]; then
 	    echo "Skip bpf file."
 	    continue
 	fi
+
+	if [[ "${f}" == *".orig" ]]; then
+            echo "Skip processed file."
+            continue
+        fi
+	
 	cp ${f} ${f}.orig
 	run_txl ${f}
 	run_coccinelle ${f}
@@ -34,7 +41,9 @@ function run_txl {
 #allFiles=("xdp_prog_kern.c" "af_xdp_kern.c" "xdp_prog_kern_02.c" "rewrite_helpers.h")
 #allFiles=("xdp_filter.c")
 #allFiles=("./katran-test/extraction/extracted.c")
-allFiles=(./decap-test/extraction/*)
+#allFiles=(./decap-test/extraction/*)
+#allFiles=(/root/github/codequery/extraction/*)
+allFiles=("xdp_vlan01_kern.c")
 COCCI_FILE="./coccinelle/xdp-to-tc.cocci"
 TXL_FILE="./txl/c.txl.1"
 
