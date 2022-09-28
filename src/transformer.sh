@@ -11,11 +11,11 @@ function run_pipeline {
 	    echo "Skip bpf file."
 	    continue
 	fi
-
 	if [[ "${f}" == *".orig" ]]; then
-            echo "Skip processed file."
-            continue
-        fi
+	    echo "Skip processed file."
+	    continue
+	fi
+
 	
 	cp ${f} ${f}.orig
 	run_txl ${f}
