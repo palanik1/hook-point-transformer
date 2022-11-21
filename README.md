@@ -1,6 +1,6 @@
 # hook-point-transformer
 ## How to Download?
-git clone 
+git clone git@github.com:palanik1/hook-point-transformer.git
 ## How to Build?
 ## How to Install?
 ## 
