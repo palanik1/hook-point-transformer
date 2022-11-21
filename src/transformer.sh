@@ -44,8 +44,9 @@ function run_txl {
 #allFiles=(./decap-test/extraction/*)
 #allFiles=(/root/github/codequery/extraction/*)
 allFiles=("xdp_vlan01_kern.c")
-COCCI_FILE="./coccinelle/xdp-to-tc.cocci"
-TXL_FILE="./txl/c.txl.1"
+allFiles=("./examples/l3af_xdp_ratelimiting/ratelimiting_kern.c")
+COCCI_FILE="./asset/coccinelle/xdp-to-tc.cocci"
+TXL_FILE="./asset/txl/c.txl.1"
 
 run_pipeline
 
