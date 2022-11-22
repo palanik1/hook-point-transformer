@@ -1,14 +1,14 @@
 # hook-point-transformer
 ## How to Download?
-git clone git@github.com:palanik1/hook-point-transformer.git
-## How to Build?
-## How to Install?
-## 
+git clone --recurse-submodules git@github.com:palanik1/hook-point-transformer.git
 
+## How to Build?
+docker build . -t opened/transform:0.01
+
+## How to Install?
+er run -it  --mount type=bind,src=[host_dir],dst=/root/op opened/transform:0.01
 
 # How to verify equivalence of XDP and TC code
-## Dependencies
- Python3 and Scapy 
 
 ## Running verifier
 Run verifier.sh. The script performs the following steps
