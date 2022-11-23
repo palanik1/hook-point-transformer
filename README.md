@@ -1,4 +1,5 @@
 # hook-point-transformer
+Works for Ubuntu 20.04 and Linux kernel 5.4.0-131
 ## How to Download?
 git clone --recurse-submodules git@github.com:palanik1/hook-point-transformer.git
 
@@ -6,7 +7,7 @@ git clone --recurse-submodules git@github.com:palanik1/hook-point-transformer.gi
 docker build . -t opened/transform:0.01
 
 ## How to Install?
-er run -it  --mount type=bind,src=[host_dir],dst=/root/op opened/transform:0.01
+docker run -it  --mount type=bind,src=[host_dir],dst=/root/op opened/transform:0.01
 
 # How to verify equivalence of XDP and TC code
 

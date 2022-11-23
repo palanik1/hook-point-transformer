@@ -1,3 +1,0 @@
-[submodule "asset/pcap-diff"]
-	path = asset/pcap-diff
-	url = git@github.com:isginf/pcap-diff.git

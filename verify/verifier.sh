@@ -150,4 +150,4 @@ echo "Attaching at XDP"
 attach_and_check XDP ${PROG_XDP} ${SEC}
 clean_XDP veth2
 #read
-python3 ../../asset/pcap-diff -i recv-xdp.pcap -i recv-tc.pcap -c -m
+python3 ../../dep/pcap-diff -i recv-xdp.pcap -i recv-tc.pcap -c -m
