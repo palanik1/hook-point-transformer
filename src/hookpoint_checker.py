@@ -1,6 +1,7 @@
 import json
 from summarizer import *
 
+
 def is_func_compatible(prog_file,start,end,hookpoint,helper_hookpoint_dict):
     lines = []
     ifile = open(prog_file,'r')
@@ -13,10 +14,10 @@ def is_func_compatible(prog_file,start,end,hookpoint,helper_hookpoint_dict):
         ##print("skipping line#: ",lineCt)
         ifile.readline()
         lineCt = lineCt + 1;
-    while lineCt <= endLine :
+    while lineCt <= end :
         line = ifile.readline()
         ##print("lineCt",lineCt, " line: ",line)
-        lines.append[line]
+        lines.append(line)
         lineCt= lineCt + 1
     ifile.close()
     return is_lines_compatible(lines,hookpoint,helper_hookpoint_dict)
@@ -47,6 +48,8 @@ def is_prog_compatible(prog_name,hookpoint,helper_hookpoint_dict):
     lines = ifile.readlines()
     return is_lines_compatible(lines,hookpoint,helper_hookpoint_dict)
     '''
+    lines = ifile.readlines();
+
     encoding = get_helper_encoding(lines,helper_hookpoint_dict)
     print("Encoding: ",encoding)
     helpers = encoding.split(",")
@@ -58,8 +61,7 @@ def is_prog_compatible(prog_name,hookpoint,helper_hookpoint_dict):
         if ret == False:
             return False
     return True
-    '''
-
+'''
 def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
     hook_set = None
     for helper in helpers:
@@ -75,10 +77,19 @@ def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
     return hook_set
 
 if __name__=="__main__":
-    fname = './helper_hookpoint_map.json'
+    fname = '../asset/bpf_helper_mappings/helper_hookpoint_map.json'
     helper_hookpoint_dict = load_bpf_helper_map(fname)
-    ret = can_attach("sched_act","bpf_skb_change_type",helper_hookpoint_dict)
-    print(ret)
-    #ret = is_prog_compatible("decompiled.c","sched_act",helper_hookpoint_dict)
-    ret = is_prog_compatible("decompiled.c","xdp",helper_hookpoint_dict)
+    '''
+    prog_file="../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c"
+    start=100
+    end=276
+    hookpoint="sched_act"
+    '''
+    
+    prog_file="../examples/suricata-test/xdp_filter.c"
+    start=487
+    end=554
+    #hookpoint="sched_act"
+    hookpoint="flow_dissector"
+    ret = is_func_compatible(prog_file,start,end,hookpoint,helper_hookpoint_dict)
     print(ret)

@@ -13,6 +13,8 @@
 #include <linux/ip.h>
 #include <linux/in.h>
 #include <linux/tcp.h>
+#include <iproute2/bpf_elf.h>
+
 
 /* TCP flags */
 #define TCP_FIN  0x01
@@ -25,56 +27,71 @@
 #define TCP_CWR  0x80
 #define TCP_FLAGS (TCP_FIN|TCP_SYN|TCP_RST|TCP_ACK|TCP_URG|TCP_ECE|TCP_CWR)
 
+#define bpf_printk(fmt, ...)                            \
+({                                                      \
+        char ____fmt[] = fmt;                           \
+        bpf_trace_printk(____fmt, sizeof(____fmt),      \
+                         ##__VA_ARGS__);                \
+})
+
+#ifndef __section
+# define __section(NAME)                  \
+	__attribute__((section(NAME), used))
+#endif
+
+#define PIN_GLOBAL_NS        2
+
 /* Stores the ratelimit value(per second) */
-struct bpf_map_def SEC("maps") rl_config_map = {
-	.type		= BPF_MAP_TYPE_ARRAY,
-	.key_size	= sizeof(uint32_t),
-	.value_size	= sizeof(uint64_t),
-	.max_entries	= 1,
+//Move map defintions to newer format 
+struct bpf_elf_map rl_config_map __section("maps") = {
+	.type           = BPF_MAP_TYPE_ARRAY,
+	.size_key       = sizeof(uint32_t),
+	.size_value     = sizeof(uint64_t),
+	.pinning        = PIN_GLOBAL_NS,
+	.max_elem     = 1,
 };
+
 
 /* Maintains the timestamp of a window and the total number of
  * connections received in that window(window = 1 sec interval) */
-struct bpf_map_def SEC("maps") rl_window_map = {
+struct bpf_elf_map SEC("maps") rl_window_map = {
 	.type		= BPF_MAP_TYPE_HASH,
-	.key_size	= sizeof(uint64_t),
-	.value_size	= sizeof(uint64_t),
-	.max_entries	= 100,
+	.size_key	= sizeof(uint64_t),
+	.size_value	= sizeof(uint64_t),
+	.pinning        = PIN_GLOBAL_NS,
+	.max_elem	= 100,
 };
 
 /* Maintains the total number of connections received(TCP-SYNs)
  * Used only for metrics visibility */
-struct bpf_map_def SEC("maps") rl_recv_count_map = {
+struct bpf_elf_map SEC("maps") rl_recv_count_map = {
 	.type		= BPF_MAP_TYPE_HASH,
-	.key_size	= sizeof(uint64_t),
-	.value_size	= sizeof(uint64_t),
-	.max_entries	= 1
+	.size_key	= sizeof(uint64_t),
+	.size_value	= sizeof(uint64_t),
+	.pinning        = PIN_GLOBAL_NS,
+	.max_elem	= 1
+	
 };
 
 /* Maintains the total number of connections dropped as the ratelimit is hit
  * Used only for metrics visibility */
-struct bpf_map_def SEC("maps") rl_drop_count_map = {
+struct bpf_elf_map SEC("maps") rl_drop_count_map = {
 	.type		= BPF_MAP_TYPE_HASH,
-	.key_size	= sizeof(uint64_t),
-	.value_size	= sizeof(uint64_t),
-	.max_entries	= 1
+	.size_key	= sizeof(uint64_t),
+	.size_value	= sizeof(uint64_t),
+	.pinning        = PIN_GLOBAL_NS,
+	.max_elem	= 1
 };
 
 /* Maintains the ports to be ratelimited */
-struct bpf_map_def SEC("maps") rl_ports_map = {
+struct bpf_elf_map SEC("maps") rl_ports_map = {
         .type           = BPF_MAP_TYPE_HASH,
-        .key_size       = sizeof(uint16_t),
-        .value_size     = sizeof(uint8_t),
-        .max_entries    = 50
+        .size_key       = sizeof(uint16_t),
+        .size_value     = sizeof(uint8_t),
+	 .pinning        = PIN_GLOBAL_NS,
+        .max_elem    = 50
 };
 
-/* Maintains the prog fd of the next XDP program in the chain */
-struct bpf_map_def SEC("maps") xdp_rl_ingress_next_prog = {
-        .type           = BPF_MAP_TYPE_PROG_ARRAY,
-        .key_size       = sizeof(int),
-        .value_size     = sizeof(int),
-        .max_entries    = 1
-};
 
 
 /* TODO Use atomics or spin locks where naive increments are used depending
@@ -111,24 +128,37 @@ static __always_inline int _xdp_ratelimit(struct xdp_md *ctx)
     if (tcph + 1 > data_end)
         return XDP_PASS;
 
-    /* Ignore other than TCP-SYN packets */
-    if (!(tcph->syn & TCP_FLAGS))
-        return XDP_PASS;
 
+    bpf_printk("NEW: TCP Syn : %d\n",tcph->syn & TCP_FLAGS);
+      
+    /* Ignore other than TCP-SYN packets */
+    if (!(tcph->syn & TCP_FLAGS)){
+      //bpf_printk("Ignoring %d \n",6);
+        return XDP_PASS;
+    }
+
+       
     /* Ignore TCP-SYN-ACK packets */
     if (tcph->ack & TCP_FLAGS)
         return XDP_PASS;
 
-    uint16_t dstport = bpf_ntohs(tcph->dest);
-    if(!bpf_map_lookup_elem(&rl_ports_map, &dstport))
-        return XDP_PASS;
 
+    uint16_t dstport = bpf_ntohs(tcph->dest);
+
+    
     uint64_t rkey = 0;
     uint64_t *rate = bpf_map_lookup_elem(&rl_config_map, &rkey);
+    //bpf_printk("Check: rate  %d\n",rkey);
+    if (!rate){
+        bpf_printk("Return: rate %d\n",rkey);
+	return XDP_PASS;
+    } else {
+      //bpf_printk("Set: rate %d\n",*rate);
+    }
 
-    if (!rate)
-        return XDP_PASS;
-
+    //*rate = 5; //IRL Hard coding
+    bpf_printk("pass rate: %d\n",*rate);
+        
     /* Current time in monotonic clock */
     uint64_t tnow = bpf_ktime_get_ns();
 
@@ -145,7 +175,9 @@ static __always_inline int _xdp_ratelimit(struct xdp_md *ctx)
      * Ex: ts of the incoming connections from the time 16625000000000 till
      * 166259999999 is rounded off to 166250000000000 to track the incoming
      * connections received in that one second interval. */
-    uint64_t cw_key = tnow / NANO * NANO;
+    
+    uint64_t cw_key = (tnow / NANO)  * NANO;
+    
 
     /* Previous window is one second before the current window */
     uint64_t pw_key = cw_key - NANO;
@@ -164,8 +196,13 @@ static __always_inline int _xdp_ratelimit(struct xdp_md *ctx)
 
     /* Just make the verifier happy, it would never be the case in real as
      * these two counters are initialised in the user space. */
-    if(!in_count || !drop_count)
-        return XDP_PASS;
+    if(!in_count || !drop_count){
+      bpf_printk("count null %d\n",rate);
+      return XDP_PASS;
+    }
+
+    bpf_printk("cw_key %u\n",cw_key);
+    bpf_printk("pw_key %u\n",pw_key);
 
     /* Increment the total number of incoming connections counter */
 
@@ -192,10 +229,12 @@ static __always_inline int _xdp_ratelimit(struct xdp_md *ctx)
             /* Connection count in the current window already exceeded the
              * rate limit so drop this connection. */
             (*drop_count)++;
+	    bpf_printk("DROP CONNECTION: CT  %d\n",*cw_count);
             return XDP_DROP;
         }
         /* Allow otherwise */
         (*cw_count)++;
+	bpf_printk("ALLOW CONNECTION: CT  %d\n",*cw_count);
         return XDP_PASS;
     }
 
@@ -209,28 +248,43 @@ static __always_inline int _xdp_ratelimit(struct xdp_md *ctx)
     uint64_t total_count = (uint64_t)((pw_weight * (*pw_count)) +
         (*cw_count) * MULTIPLIER);
 
-    if (total_count > ((*rate) * MULTIPLIER))
+    bpf_printk("tot_ct : %d\n",total_count);
+    bpf_printk("cw1_ct : %d\n",*cw_count);
+
+    //uint64_t temp = (*rate) * MULTIPLIER;
+    //uint64_t temp = 5;
+    
+    //bpf_printk("temp: %d\n",temp);
+
+    //int c = (total_count > temp);
+    //bpf_printk("c: %d\n",c);
+    
+    //if (c )
+    if (total_count > (*rate))
+      //if (total_count > ((*rate) * MULTIPLIER))
     {
         /* Connection count from tnow to (tnow-1) exceeded the rate limit,
          * so drop this connection. */
         (*drop_count)++;
+	bpf_printk("DROP CONNECTION: CT  %d\n",*cw_count);
         return XDP_DROP;
     }
     /* Allow otherwise */
     (*cw_count)++;
+    bpf_printk("ALLOW CONNECTION: CT  %d\n",*cw_count);
     return XDP_PASS;
 }
 
 SEC("xdp_ratelimiting")
 int _xdp_ratelimiting(struct xdp_md *ctx)
 {
-   int rc = _xdp_ratelimit(ctx);
+  //bpf_printk("rate_limiting\n");
+  int rc = _xdp_ratelimit(ctx);
 
    if (rc == XDP_DROP) {
       return XDP_DROP;
    }
 
-   bpf_tail_call(ctx, &xdp_rl_ingress_next_prog, 0);
    return XDP_PASS;
 }
 
