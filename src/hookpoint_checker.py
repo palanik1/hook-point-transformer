@@ -50,21 +50,7 @@ def is_prog_compatible(prog_name,hookpoint,helper_hookpoint_dict):
     ifile = open(prog_name,'r')
     lines = ifile.readlines()
     return is_lines_compatible(lines,hookpoint,helper_hookpoint_dict)
-    '''
-    lines = ifile.readlines();
 
-    encoding = get_helper_encoding(lines,helper_hookpoint_dict)
-    print("Encoding: ",encoding)
-    helpers = encoding.split(",")
-    del helpers[-1] #empty element
-    hook_set = get_compatible_hookpoints(helpers,helper_hookpoint_dict)
-    print("Compatible Hookpoints: ",hook_set)
-    for helper in helpers:
-        ret = can_attach(hookpoint,helper,helper_hookpoint_dict)
-        if ret == False:
-            return False
-    return True
-'''
 def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
     hook_set = None
     for helper in helpers:
