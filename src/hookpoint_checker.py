@@ -1,3 +1,6 @@
+#Author: Sayandeep Sen (sayandes@in.ibm.com)
+#Author: Palani Kodeswaran (palani.kodeswaran@in.ibm.com)
+
 import json
 from summarizer import *
 
