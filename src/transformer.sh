@@ -62,17 +62,16 @@ function run_txl {
     mv op.c ${file}
 }
 
-#TODO: make cmd line args
-#allFiles=("xdp_prog_kern.c" "af_xdp_kern.c" "xdp_prog_kern_02.c" "rewrite_helpers.h")
-#allFiles=("xdp_filter.c")
-#allFiles=("./katran-test/extraction/extracted.c")
-#allFiles=(./decap-test/extraction/*)
-#allFiles=(/root/github/codequery/extraction/*)
-allFiles=("xdp_vlan01_kern.c")
-allFiles=("./examples/l3af_xdp_ratelimiting/ratelimiting_kern.c")
-makefile="./examples/l3af_xdp_ratelimiting/Makefile"
 COCCI_FILE="./dep/coccinelle/xdp-to-tc.cocci"
 TXL_FILE="./dep/txl/c.txl.1"
+
+echo "USAGE: transformer.sh <Makefile> <list of files to transform>"
+
+makefile=$1
+echo "Makefile: "${makefile}
+shift
+allFiles=$*
+echo "files: "${allFiles}
 
 run_pipeline
 
