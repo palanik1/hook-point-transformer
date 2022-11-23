@@ -2,7 +2,6 @@
 # Palanivel Kodeswaran <palani.kodeswaran@in.ibm.com>
 # Sayandeep Sen <sayandes@in.ibm.com>
 
-
 function run_pipeline {
     bpf="bpf"
     for f in ${allFiles[@]}; do
