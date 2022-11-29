@@ -5,7 +5,8 @@ LPC 2022 blurb describing the goal of the tool and an initial prototype is here:
 
 Works for Ubuntu 20.04 and Linux kernel 5.4.0-131
 ## How to Download?
-git clone --recurse-submodules git@github.com:palanik1/hook-point-transformer.git
+git clone --recurse-submodules git@github.com:palanik1/opened_transformation.git
+
 
 ## How to Build?
 docker build . -t opened/transform:0.01
