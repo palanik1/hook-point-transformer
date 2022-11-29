@@ -37,6 +37,21 @@ def is_lines_compatible(lines,hookpoint,helper_hookpoint_dict):
     else:
         return False
 
+def is_lines_compatible_verbose(lines,hookpoint,helper_hookpoint_dict):
+    conflicting_helpers=[]
+    encoding = get_helper_encoding(lines,helper_hookpoint_dict)
+    print("Encoding: ",encoding)
+    helpers = encoding.split(",")
+    del helpers[-1] #empty element
+    for helper in helpers:
+        if not can_attach(hookpoint,helper,helper_hookpoint_dict):
+            conflicting_helpers.append(helper)
+
+    if len(conflicting_helpers) > 0:
+        return False, conflicting_helpers
+    else:
+        return True, conflicting_helpers
+
 
 def can_attach(hookpoint,helper,helper_hookpoint_dict):
     hookpoint_list = helper_hookpoint_dict[helper]
@@ -49,7 +64,14 @@ def can_attach(hookpoint,helper,helper_hookpoint_dict):
 def is_prog_compatible(prog_name,hookpoint,helper_hookpoint_dict):
     ifile = open(prog_name,'r')
     lines = ifile.readlines()
-    return is_lines_compatible(lines,hookpoint,helper_hookpoint_dict)
+    status,conflicts = is_lines_compatible_verbose(lines,hookpoint,helper_hookpoint_dict)
+    if not status:
+        print("PROG: "+prog_name+" INCOMPATIBLE HOOKPOINT: "+hookpoint+" CONFLICTING HELPERS: ")
+        print(conflicts)
+        return False
+    else:
+        print("PROG: "+prog_name+" COMPATIBLE HOOKPOINT: "+hookpoint)
+        return True
 
 def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
     hook_set = None
@@ -68,6 +90,11 @@ def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
 if __name__=="__main__":
     fname = '../asset/bpf_helper_mappings/helper_hookpoint_map.json'
     helper_hookpoint_dict = load_bpf_helper_map(fname)
+    #ret = is_prog_compatible("../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c","flow_dissector",helper_hookpoint_dict)
+    ret = is_prog_compatible("../examples/suricata-test/xdp_filter.c","flow_dissector",helper_hookpoint_dict)
+    print(ret)
+
+
     '''
     prog_file="../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c"
     start=100
