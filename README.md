@@ -1,4 +1,8 @@
 # hook-point-transformer
+
+OPENED Transformation Tool
+LPC 2022 blurb describing the goal of the tool and an initial prototype is here: https://lpc.events/event/16/contributions/1370/
+
 Works for Ubuntu 20.04 and Linux kernel 5.4.0-131
 ## How to Download?
 git clone --recurse-submodules git@github.com:palanik1/hook-point-transformer.git
