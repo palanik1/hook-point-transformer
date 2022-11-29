@@ -1,0 +1,5 @@
+1. Run extraction_runner.py from extraction
+2. Run hookpoint_checker if it passes
+3. Run transformation
+4. Run make
+5. Run verify
