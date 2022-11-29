@@ -87,12 +87,47 @@ def get_compatible_hookpoints(helpers,helper_hookpoint_dict):
 
     return hook_set
 
+
+
+
 if __name__=="__main__":
-    fname = '../asset/bpf_helper_mappings/helper_hookpoint_map.json'
-    helper_hookpoint_dict = load_bpf_helper_map(fname)
+
+    parser = argparse.ArgumentParser(description='eBPF HookPoint Transformer')
+
+    parser.add_argument('-f','--bpfHelperFile', type=str,required=True,
+            help='Information regarding bpf_helper_funcitons ')
+
+    parser.add_argument('-s','--src', type=str,required=True,
+            help='source hook point')
+
+    parser.add_argument('-t','--target', type=str,required=True,
+            help='target hook point')
+
+    parser.add_argument('-m','--makeFile', type=str,required=True,
+            help='Makefile')
+    
+    parser.add_argument('-l','--fileList', nargs='+', type=str,required=True,
+            help='List of files')
+
+
+    args = parser.parse_args()
+
+
+    print("Args",args)
+
+    bpf_helper_fname = args.bpfHelperFile
+    src_hookpoint=args.src
+    target_hookpoint=args.target
+    make_file=args.makeFile
+    file_list=args.fileList
+    
+    #fname = '../asset/bpf_helper_mappings/helper_hookpoint_map.json'
+    helper_hookpoint_dict = load_bpf_helper_map(bpf_helper_fname)
     #ret = is_prog_compatible("../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c","flow_dissector",helper_hookpoint_dict)
-    ret = is_prog_compatible("../examples/suricata-test/xdp_filter.c","flow_dissector",helper_hookpoint_dict)
-    print(ret)
+    #ret = is_prog_compatible("../examples/suricata-test/xdp_filter.c",target_hookpoint,helper_hookpoint_dict)
+    for f in file_list:
+        ret = is_prog_compatible(f,target_hookpoint,helper_hookpoint_dict)
+        print(ret)
 
 
     '''
@@ -100,7 +135,7 @@ if __name__=="__main__":
     start=100
     end=276
     hookpoint="sched_act"
-    '''
+
     
     prog_file="../examples/suricata-test/xdp_filter.c"
     start=487
@@ -109,3 +144,4 @@ if __name__=="__main__":
     hookpoint="flow_dissector"
     ret = is_func_compatible(prog_file,start,end,hookpoint,helper_hookpoint_dict)
     print(ret)
+    '''
