@@ -42,9 +42,13 @@ function run_coccinelle {
     file=$1
     echo "[RUN_COCCINELLE] FILE: " ${file}
     filename=$(basename -- "${file}")
+    echo $filename
     extension="${filename##*.}"
+    echo $extension
     filename="${filename%.*}"
+    echo $filename
     transformed=${filename}"-Transformed"
+    echo $transformed
     
     #replace filename with filename-Transformed
     op_file=${file//$filename/$transformed}

@@ -1,14 +1,16 @@
-s
 # Palanivel Kodeswaran <palani.kodeswaran@in.ibm.com>
 # Sayandeep Sen <sayandes@in.ibm.com>
 
 
 # namespace ns1 -> veth1 40.0.1.2/24
 # namespace ns2 -> veth2 40.0.2.2/24
-
-
 import os
 import shutil
+import subprocess
+
+cocci_file="./dep/coccinelle/xdp-to-tc.cocci"
+txl_file="./dep/txl/c.txl.1"
+
 
 def check_if_cmd_available():
     commands = ['tcpdump', 'ip', 'tc']
@@ -51,58 +53,55 @@ def run_cmd(cmd):
 def run_pipeline(makefile,file_list) :
     bpf="bpf"
     for f in file_list:
-	print("FILE: " +f)
+        print("FILE: " +f)
         if "bpf" in f:
-	    print("Skip bpf file.")
-	    continue
+            print("Skip bpf file.")
+            continue
         if f.endswith(".orig"):
-	    print("Skip processed file.")
-	    continue
-        shutil.copyfile(f, f+".orig")
-	run_txl(f)
-	run_coccinelle(f)
-	filename=run_cmd("\$(basename -- "+f+")")
-	extension=run_cmd("\${filename##*.}"
-	filename="${filename%.*}"
-	
-	op_file=filename+"-Transformed"
-	fix_makefile(makefile, filename, op_file)
+            print("Skip processed file.")
+            continue
+        print("file: "+f)
+        copy_f = f+".orig"
+        shutil.copyfile(f, copy_f)
+        run_txl(f)
+        run_coccinelle(f)
+
+        filename=os.path.basename(f)
+        name,extension = os.path.splitext(filename)
+        op_file=name+"-Transformed"
+        
+        fix_makefile(makefile, name, op_file)
 
     
 
 def fix_makefile(makefile,ifile,ofile):
     op_makefile=makefile+".transformed"
     shutil.copyfile(makefile,op_makefile)
-    run_cmd = ("sed -i \"s|"+ifile+"|"+ofile+"|g\" "+ op_makefile)
+    output = run_cmd("sed -i \"s|"+ifile+"|"+ofile+"|g\" "+ op_makefile)
     
 
 
-def run_coccinelle(filename) :
-    echo "[RUN_COCCINELLE] FILE: " ${file}
-    filename=$(basename -- "${file}")
-    extension="${filename##*.}"
-    filename="${filename%.*}"
-    transformed=${filename}"-Transformed"
-    
+def run_coccinelle(fname) :
+    print("[RUN_COCCINELLE] FILE: "+fname)
+    filename=os.path.basename(fname)
+    name,extension=os.path.splitext(filename)
+    transformed=name+"-Transformed"+extension
+    print("name: "+name+" extension: "+extension); 
     #replace filename with filename-Transformed
-    op_file=${file//$filename/$transformed}
+    op_file = fname.replace(filename,transformed)
     #op_file=${filename}"-Transformed."${extension}
-    #spatch --sp-file ${COCCI_FILE} ${file} --in-place --debug
-    output = run_cmd("spatch --sp-file "+COCCI_FILE+" "+filename+" -o "+op_file)
+    #spatch --sp-file ${cocci_file} ${file} --in-place --debug
+    output = run_cmd("spatch --sp-file "+cocci_file+" "+fname+" -o "+op_file)
 
 
-def run_txl(filename,txl_file):
+def run_txl(filename):
     print("[RUN_TXL] FILE: "+filename)
     output = run_cmd("txl -o op.c "+filename+" "+txl_file)
 
     #mv op.c ${file}
 
+print("USAGE: transformer.sh <Makefile> <list of files to transform>")
 
-COCCI_FILE="./dep/coccinelle/xdp-to-tc.cocci"
-TXL_FILE="./dep/txl/c.txl.1"
-
-echo "USAGE: transformer.sh <Makefile> <list of files to transform>"
-
-makefile=Makefile
-run_pipeline(make_file,file_list)
+make_file="Makefile"
+run_pipeline("./examples/l3af_xdp_ratelimiting/Makefile",["examples/l3af_xdp_ratelimiting/ratelimiting_kern.c"])
 
