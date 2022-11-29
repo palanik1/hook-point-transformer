@@ -3,7 +3,7 @@
 
 import json
 from summarizer import *
-
+from transformer import *
 
 def is_func_compatible(prog_file,start,end,hookpoint,helper_hookpoint_dict):
     lines = []
@@ -66,7 +66,7 @@ def is_prog_compatible(prog_name,hookpoint,helper_hookpoint_dict):
     lines = ifile.readlines()
     status,conflicts = is_lines_compatible_verbose(lines,hookpoint,helper_hookpoint_dict)
     if not status:
-        print("PROG: "+prog_name+" INCOMPATIBLE HOOKPOINT: "+hookpoint+" CONFLICTING HELPERS: ")
+        print("PROG: "+prog_name+" INCOMPATIBLE HOOKPOINT: "+hookpoint+" UNTRANSFORMABLE HELPERS: ")
         print(conflicts)
         return False
     else:
@@ -128,7 +128,12 @@ if __name__=="__main__":
     for f in file_list:
         ret = is_prog_compatible(f,target_hookpoint,helper_hookpoint_dict)
         print(ret)
-
+        if not ret:
+            print("CANNOT TRANSFORM")
+            exit(0)
+            
+    print("RUNNING TRANSFORMATION for HOOKPOINT: "+target_hookpoint)
+    run_pipeline(make_file,file_list)
 
     '''
     prog_file="../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c"
