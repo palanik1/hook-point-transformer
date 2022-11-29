@@ -1,4 +1,4 @@
-#Authors
+.#Authors
 # Palanivel Kodeswaran <palani.kodeswaran@in.ibm.com>
 # Sayandeep Sen <sayandes@in.ibm.com>
 
@@ -113,19 +113,19 @@ function start_python_sender {
 function attach_only {
     echo "TODO"
     #clean
-    setup_interfaces
+    #setup_interfaces
  
-    iface="veth2"
+    iface="veth1"
     read
     if [ $1 == "TC" ]; then
 	attach_at_TC ${iface} $2 $3
-	tcpdump -i ${iface} -vvv -e -u not arp and not icmp and not ip6 -w recv-tc.pcap &
+	#tcpdump -i ${iface} -vvv -e -u not arp and not icmp and not ip6 -w recv-tc.pcap &
 
     else
 	attach_at_XDP ${iface} $2 $3
 	ip link show ${iface}
 	read
-	tcpdump -i ${iface} -vvv -e  -u not arp and not icmp and not ip6 -w recv-xdp.pcap &
+	#tcpdump -i ${iface} -vvv -e  -u not arp and not icmp and not ip6 -w recv-xdp.pcap &
 
     fi
 
@@ -161,9 +161,9 @@ function attach_and_check {
 }
 
 #<script> <prog> <sec>
-PROG_TC="./decap-test/extraction/extracted.o"
+PROG_TC="../examples/l3af_xdp_ratelimiting/ratelimiting_kern-Transformed.o"
 PROG_XDP="xdp_filter.o"
-SEC="decap"
+SEC="xdp_ratelimiting"
 
 echo "Attaching at TC"
 attach_only TC ${PROG_TC} ${SEC}

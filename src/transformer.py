@@ -71,8 +71,8 @@ def run_pipeline(makefile,file_list) :
         op_file=name+"-Transformed"
         
         fix_makefile(makefile, name, op_file)
-
-    
+        shutil.copyfile(copy_f,f)
+        
 
 def fix_makefile(makefile,ifile,ofile):
     op_makefile=makefile+".transformed"
@@ -98,9 +98,9 @@ def run_txl(filename):
     print("[RUN_TXL] FILE: "+filename)
     output = run_cmd("txl -o op.c "+filename+" "+txl_file)
 
-    #mv op.c ${file}
+    output = run_cmd("mv op.c "+filename)
 
-print("USAGE: transformer.sh <Makefile> <list of files to transform>")
+print("USAGE: transformer.py <Makefile> <list of files to transform>")
 
 make_file="Makefile"
 run_pipeline("./examples/l3af_xdp_ratelimiting/Makefile",["examples/l3af_xdp_ratelimiting/ratelimiting_kern.c"])
