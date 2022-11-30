@@ -159,14 +159,41 @@ def attach_and_check(hook_p, obj_f, section, iface):
 check_if_cmd_available()
 check_if_file_available(files)
 
-#<script> <prog> <sec>
-PROG_TC="./decap-test/extraction/extracted.o"
-PROG_XDP="xdp_filter.o"
-SEC="decap"
+if __name__=="__main__":
+    #<script> <prog> <sec>
+    parser = argparse.ArgumentParser(description='eBPF Transformation Verifier')
 
-print("Attaching at TC")
-attach_only("TC", PROG_TC, SEC)
-#clean_TC veth2
-#attach_and_check("XDP",PROG_XDP, SEC)
-#clean_XDP veth2
-#output = run_cmd("python3 pcap-diff -i recv-xdp.pcap -i recv-tc.pcap -c -m")
+    parser.add_argument('-t','--bpfTCProgFile', type=str,required=True,
+            help='eBPF Object file for TC hook point')
+
+    parser.add_argument('-x','--bpfXDPProgFile', type=str,required=True,
+            help='eBPF Object file for XDP hook point')
+
+
+    parser.add_argument('-u','--TCSec', type=str,required=True,
+            help='TC code section name')
+    
+    parser.add_argument('-y','--XDPSec', nargs='+', type=str,required=True,
+            help='XDP code section name')
+
+
+    args = parser.parse_args()
+
+
+    print("Args",args)
+
+
+#    PROG_TC="./decap-test/extraction/extracted.o"
+#    PROG_XDP="xdp_filter.o"
+#    SEC="decap"
+    PROG_TC= args.bpfTCProgFile
+    PROG_XDP=args.bpfXDPProgFile
+    SEC_TC=args.TCSec
+    SEC_XDP=args.XDPSec
+
+    print("Attaching at TC")
+    attach_and_check("TC", PROG_TC, SEC_TC)
+    #clean_TC veth2
+    attach_and_check("XDP",PROG_XDP, SEC_XDP)
+    #clean_XDP veth2
+    output = run_cmd("python3 ../dep/pcap-diff/pcap-diff.py -i recv-xdp.pcap -i recv-tc.pcap -c -m")
