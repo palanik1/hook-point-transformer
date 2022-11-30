@@ -82,13 +82,13 @@ def clean_XDP(iface):
 
 
 
-def clean :
+def clean():
     output = run_cmd("ip netns del ns1")
     output = run_cmd("ip netns del ns2")
     output = run_cmd("ip link del veth1")
     output = run_cmd("ip link del veth2")
 
-def setup_interfaces :
+def setup_interfaces():
     for i in range(2):
 	output = run_cmd("ip netns del ns"+i+" > /dev/null 2>&1")# remove ns if already existed
 	output = run_cmd("ip link del veth"+i+" > /dev/null 2>&1")
@@ -133,7 +133,6 @@ def attach_only(hook_p, obj_f, section, iface):
 
 #attach_and_check <hookpoint> <prog> <sec>
 def attach_and_check(hook_p, obj_f, section, iface):
-    echo "TODO"
     #clean
     setup_interfaces()
  
@@ -143,7 +142,6 @@ def attach_and_check(hook_p, obj_f, section, iface):
 
     else:
 	attach_at_XDP(iface, obj_f, section)
-	ip link show ${iface}
         op_f = "recv-xdp.pcap"
     sleep(1)
     cmd = "tcpdump -i "+iface+" -vvv -e -u not arp and not icmp and not ip6 -w "+ op_f+ " &"
@@ -166,10 +164,9 @@ PROG_TC="./decap-test/extraction/extracted.o"
 PROG_XDP="xdp_filter.o"
 SEC="decap"
 
-echo "Attaching at TC"
+print("Attaching at TC")
 attach_only("TC", PROG_TC, SEC)
 #clean_TC veth2
-#echo "Attaching at XDP"
 #attach_and_check("XDP",PROG_XDP, SEC)
 #clean_XDP veth2
 #output = run_cmd("python3 pcap-diff -i recv-xdp.pcap -i recv-tc.pcap -c -m")
