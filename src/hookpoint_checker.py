@@ -94,7 +94,7 @@ if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description='eBPF HookPoint Transformer')
 
-    parser.add_argument('-f','--bpfHelperFile', type=str,required=True,
+    parser.add_argument('-f','--bpfHelperFile', type=str,required=False,
             help='Information regarding bpf_helper_funcitons ')
 
     parser.add_argument('-s','--src', type=str,required=True,
@@ -109,20 +109,34 @@ if __name__=="__main__":
     parser.add_argument('-l','--fileList', nargs='+', type=str,required=True,
             help='List of files')
 
+    parser.add_argument('-c','--isCilium', type=bool,required=True,
+            help='Whether cilium functions which have wrappers for helpers')
+
 
     args = parser.parse_args()
 
 
     print("Args",args)
 
-    bpf_helper_fname = args.bpfHelperFile
     src_hookpoint=args.src
     target_hookpoint=args.target
     make_file=args.makeFile
     file_list=args.fileList
-    
+    isCilium = args.isCilium
+    bpf_helper_file= ""
+    if(args.bpfHelperFile is not None):
+        bpf_helper_file = args.bpfHelperFile
+    else:
+        if(isCilium == False):
+            print("Warning: bpf_helper_file not specified using default asset/helper_hookpoint_map.json\n")
+            bpf_helper_file = "asset/bpf_helper_mappings/helper_hookpoint_map.json"
+        else:
+            print("Warning: bpf_helper_file not specified using default asset/cilium.helper_hookpoint_map.json\n")
+            bpf_helper_file = "asset/bpf_helper_mappings/cilium.helper_hookpoint_map.json"
+
+
     #fname = '../asset/bpf_helper_mappings/helper_hookpoint_map.json'
-    helper_hookpoint_dict = load_bpf_helper_map(bpf_helper_fname)
+    helper_hookpoint_dict = load_bpf_helper_map(bpf_helper_file)
     #ret = is_prog_compatible("../examples/l3af_xdp_ratelimiting/ratelimiting_kern.c","flow_dissector",helper_hookpoint_dict)
     #ret = is_prog_compatible("../examples/suricata-test/xdp_filter.c",target_hookpoint,helper_hookpoint_dict)
     for f in file_list:

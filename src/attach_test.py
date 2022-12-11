@@ -8,6 +8,7 @@
 
 
 import os
+import time
 
 def check_if_cmd_available():
     commands = ['tcpdump', 'ip', 'tc']
@@ -127,7 +128,7 @@ def attach_only(hook_p, obj_f, section, iface):
     else:
 	attach_at_XDP(iface, obj_f, section)
         op_f = "recv-xdp.pcap"
-    sleep(1)
+    time.sleep(1)
     cmd = "tcpdump -i "+iface+" -vvv -e -u not arp and not icmp and not ip6 -w "+ op_f+ " &"
     output = run_cmd(cmd)
 
@@ -143,15 +144,15 @@ def attach_and_check(hook_p, obj_f, section, iface):
     else:
 	attach_at_XDP(iface, obj_f, section)
         op_f = "recv-xdp.pcap"
-    sleep(1)
+    time.sleep(1)
     cmd = "tcpdump -i "+iface+" -vvv -e -u not arp and not icmp and not ip6 -w "+ op_f+ " &"
     output = run_cmd(cmd)
     start_python_receiver(20000)
-    #sleep 2
+
     start_python_sender()
 
     #wait for tcpdump to flush
-    sleep 5
+    time.sleep(5)
     output = run_cmd("killall tcpdump")
 
 # main
@@ -183,9 +184,6 @@ if __name__=="__main__":
     print("Args",args)
 
 
-#    PROG_TC="./decap-test/extraction/extracted.o"
-#    PROG_XDP="xdp_filter.o"
-#    SEC="decap"
     PROG_TC= args.bpfTCProgFile
     PROG_XDP=args.bpfXDPProgFile
     SEC_TC=args.TCSec

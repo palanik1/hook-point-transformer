@@ -89,7 +89,7 @@ def run_cmd(cmd):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='eBPF Code Summarizer')
 
-    parser.add_argument('-f','--bpfHelperFile', type=str,required=True,
+    parser.add_argument('-f','--bpfHelperFile', type=str,required=False,
             help='Information regarding bpf_helper_funcitons ')
 
     parser.add_argument('-s','--srcFile', type=str,required=True,
@@ -98,19 +98,38 @@ if __name__ == "__main__":
     parser.add_argument('-e','--secName', type=str,required=True,
             help='Section Name')
 
+    parser.add_argument('-c','--isCilium', type=bool,required=True,
+            help='Whether cilium functions which have wrappers for helpers')
+
 
     args = parser.parse_args()
 
     print("Args",args)
 
+    isCilium = args.isCilium
 
     
     fname = args.srcFile
     sec_name = args.secName
-    bpf_helper_file= args.bpfHelperFile #'./helper_hookpoint_map.json'
+    if(isCilium == False):
+        map_update_fn = ["bpf_sock_map_update", "bpf_map_delete_elem", "bpf_map_update_elem","bpf_map_pop_elem", "bpf_map_push_elem"]
+        map_read_fn = ["bpf_map_peek_elem", "bpf_map_lookup_elem", "bpf_map_pop_elem"]
+    else:
+        map_update_fn = ["sock_map_update", "map_delete_elem", "map_update_elem","map_pop_elem", "map_push_elem"]
+        map_read_fn = ["map_peek_elem", "map_lookup_elem", "map_pop_elem"]
+
+    bpf_helper_file= ""
+    if(args.bpfHelperFile is not None):
+        bpf_helper_file = args.bpfHelperFile
+    else:
+        if(isCilium == False):
+            print("Warning: bpf_helper_file not specified using default asset/helper_hookpoint_map.json\n")
+            bpf_helper_file = "asset/bpf_helper_mappings/helper_hookpoint_map.json"
+        else:
+            print("Warning: bpf_helper_file not specified using default asset/cilium.helper_hookpoint_map.json\n")
+            bpf_helper_file = "asset/bpf_helper_mappings/cilium.helper_hookpoint_map.json"
+
     helperdict = load_bpf_helper_map(bpf_helper_file)
-    map_update_fn = ["bpf_sock_map_update", "bpf_map_delete_elem", "bpf_map_update_elem","bpf_map_pop_elem", "bpf_map_push_elem"]
-    map_read_fn = ["bpf_map_peek_elem", "bpf_map_lookup_elem"]
 
     helper_to_desc_dict = {}
     build_helper_desc_dict("./man_bpf_helpers.txt")
