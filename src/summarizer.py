@@ -133,27 +133,6 @@ if __name__ == "__main__":
 
     helper_to_desc_dict = {}
     build_helper_desc_dict("./man_bpf_helpers.txt")
-    exit(0)
+    
 
     
-    cmd = "bpftool prog loadall " + fname+ " /sys/fs/bpf/check type tc"
-    run_cmd(cmd)
-    cmd =  "bpftool prog show"
-    output = run_cmd(cmd)
-    prog_id = get_prog_id(sec_name,output)
-    cmd = "bpftool prog dump xlated id " + prog_id +  " > out"
-    output = run_cmd(cmd)
-    print(output)
-    cmd = "grep \";\" out > decompiled.c"
-    output = run_cmd(cmd)
-    print(output)
-    ifile = open('decompiled.c','r')
-    lines = ifile.readlines();
-    encoding = get_helper_encoding(lines,helperdict)
-    read_maps = get_read_maps(lines)
-    update_maps = get_update_maps(lines)
-    print("Encoding: ",encoding,"Read Maps: ",read_maps,"Update Maps: ",update_maps)
-
-    
-    #print(rc.decode("utf-8"))
-    #runbpftool()
