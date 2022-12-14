@@ -1,2 +1,0 @@
-make
-llvm-mc -triple bpf -filetype=obj -o xdp_filter.o xdp_filter.bpf
